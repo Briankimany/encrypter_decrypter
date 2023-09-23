@@ -20,9 +20,10 @@ SecureFile is compatible with Unix-like systems (Linux, macOS) and Windows platf
 Installation and Environment Setup
 Option 1: Using a Virtual Environment (Recommended)
 
-    Create a Virtual Environment:
-
-    We strongly recommend creating a virtual environment to isolate your project's dependencies. This helps prevent conflicts with system-wide packages.
+    Create a Virtual Environment
+    We strongly recommend creating a virtual environment to isolate your project's dependencies.
+    This helps prevent conflicts with system-wide packages:
+        
 
 
    1: # Create a virtual environment
