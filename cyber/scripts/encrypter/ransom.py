@@ -24,10 +24,12 @@ def encrypt_file(file_path, key):
             directory_separator = '\\'
         new_path = os.rename(file_path, file_path + ".encrypted")
         end_time = time.time()
-        print (("encrypted {} Time taken {:>b.2F} ").format(file_path,end_time- start))
+        print (("{} encrypted  Time taken {:>b.2F} ").format(file_path,end_time- start))
         return  file_count
     except PermissionError:
         print(f"Skipping file {file_path}: permission denied")
+        pass
+    except Exception as e:
         pass
      
 

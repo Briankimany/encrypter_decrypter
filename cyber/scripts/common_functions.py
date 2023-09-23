@@ -206,7 +206,11 @@ def key_save_load(path):
     save_key = (input("Generate new key (y)\nLoad key now (r)\nPress enter to skip\nchoice?/>>")).lower()
     if save_key == 'y':
         key = Fernet.generate_key()
-        write_key_to_file(key , path)
+        if os.path.exists(path):
+            write_key_to_file(key , path)
+
+        else:
+            key = None
 
     elif save_key == 'r':
         key_path = read_single_file(path)

@@ -24,7 +24,7 @@ def decrypt_multiple_files(key , path_list):
     failed_file_count = 0
     start_time = time.time()
     for path in path_list:
-        un_done = decrypt_file(path , key , un_done , failed_file_count)
+        decrypt_file(path , key , un_done , failed_file_count)
     end_time = time.time()
     correct_file_count = file_count - failed_file_count
     print (("Time taken {:.2F}").format (end_time - start_time))
@@ -69,7 +69,7 @@ def decrypt_file(file_path, key , *args):
     if len(args) > 0:
         un_done = args[0]
         failed_file_count = args[1]
-        un_done.append(file_path)
+   
         failed_file_count += 1
        # print(un_done , failed_file_count)
     try:
@@ -93,12 +93,16 @@ def decrypt_file(file_path, key , *args):
             failed_file_count = args[1]
             un_done.append(file_path)
             failed_file_count+=1
-            return un_done
+           
 
         print (f"Invaid key  for file {half_file_path}")
         pass
     except PermissionError:
+        print(f"Permssion denied for {file_path}")
         pass
+    except  Exception as e:
+        pass
+
 
 
 

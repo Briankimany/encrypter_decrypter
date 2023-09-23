@@ -12,7 +12,7 @@ HELP_OPTIONS = ['-h', '--h', '--help', '-H', 'h', 'H']
 def main():
     while True:
         try:
-            choice = input("Decrypt = 1\nEncrypt = 2\n:")
+            choice = input("Decrypt = 1\nEncrypt = 2\n>:")
             if choice not in HELP_OPTIONS and choice != '-5' and choice != 'b':
                 starting_directory = get_root_dir()
                 if choice == '1':
