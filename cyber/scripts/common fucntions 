@@ -1,0 +1,41 @@
+    clear_console() (Method in CommonCommands Class)
+        Description: Clears the console screen.
+        Usage: Used to clear the console for a cleaner display during both encryption and decryption operations.
+        Parameters: None
+        Keywords: None
+
+    ask_help() (Method in CommonCommands Class)
+        Description: Prints a help message for encryption/decryption operations.
+        Usage: Used to provide guidance and information about available commands for both encryption and decryption.
+        Parameters: None
+        Keywords: None
+
+    go_foward(choice, directory, key, procces) (Method in CommonCommands Class)
+        Description: Allows the user to go forward into a directory or perform encryption/decryption on a file.
+        Usage: Used to handle user choices for navigation or actions during both encryption and decryption.
+        Parameters:
+            choice (int): The user's choice, which can be an integer corresponding to a menu option.
+            directory (str): The current directory path.
+            key (str): The encryption or decryption key.
+            procces (str): The process type, which can be "encrypt" or "decrypt."
+        Keywords: None
+
+    *display_folder(directory, args) (Method in CommonCommands Class)
+        Description: Displays the contents of a folder.
+        Usage: Used to list the files and folders within a directory during both encryption and decryption.
+        Parameters:
+            directory (str): The directory path to display.
+            *args (optional): Additional arguments (not used in the function).
+        Keywords: None
+
+    which_proccess() (Method in EnCommands Class)
+        Description: Prints information about the encryption process.
+        Usage: Used to provide information to the user about the current encryption process.
+        Parameters: None
+        Keywords: None
+
+    which_proccess() (Method in DecCommands Class)
+        Description: Prints information about the decryption process.
+        Usage: Used to provide information to the user about the current decryption process.
+        Parameters: None
+        Keywords: None

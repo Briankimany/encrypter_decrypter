@@ -1,0 +1,5 @@
+cryptography
+
+# Install the 'cyber' package from the  GitHub repository
+git+https://github.com/Briankimany/file-encryption-and-decryption.git@main#egg=cyber
+

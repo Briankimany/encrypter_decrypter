@@ -1,0 +1,786 @@
+import  os
+from cyber.scripts.common_functions import check_content ,process_directory ,enc_help,  clear_console ,read_path , directory_separator
+from cyber.scripts.encrypter.ransom import enc_traverse_directory
+from cyber.scripts.encrypter.ransom import encrypt_file
+import time
+from ajay.cyber.scripts.decrypter.decrypter import decrypt_multiple_files , decrypt_file
+restricted_directories = [
+    "/etc",
+    "/bin",
+    "/sbin",
+    "/usr",
+    "/var",
+    "C:\\Windows",
+    "C:\\Program Files",
+    "C:\\Program Files (x86)",
+    "C:\\System Volume Information"
+]
+
+
+class CommonCommands:
+
+    def navigate_back(self, directory, *args):
+        if len(args) > 0:
+            path = args[0]
+            print('new path being passed ', path)
+        directory = directory
+        directory = os.path.dirname(directory)
+        return directory
+
+    def clear_console(self):
+        clear_console()
+
+    def ask_help(self):
+        print(enc_help())
+
+    def go_foward(self, choice, directory, key , procces):
+        directory_sep = directory_separator()
+        directory = directory
+        key = key
+        contents = os.listdir(directory)
+        directory = os.path.join(directory, contents[choice - 1])
+        if os.path.isfile(directory):
+            dec_file = input(f"Do you wish to {procces} , {directory.split(directory_sep)[-1]} (y,n)")
+            if dec_file.lower() == 'y':
+                print(("{} {} ").format(procces , directory))
+                if str(procces).lower() == "decrypt":
+                    decrypt_file(directory, key)
+                else:
+                    encrypt_file(directory, key)
+                directory = os.path.dirname(directory)
+            else:
+                pass
+
+        else :
+            pass
+
+        return directory
+
+    def display_folder(self, directory, *args):
+        directory = directory
+        if len(args) > 0:
+            path = args[0]
+            directory = path
+        print(directory)
+        if os.path.isdir(directory):
+            try:
+                contents = os.listdir(directory)
+                for i, folder in enumerate(contents):
+                    state = "{}  {}".format(i + 1, folder)
+                    print(state)
+                return directory
+            except PermissionError:
+                print(f"Permission denied for file {directory}")
+                return os.path.dirname(directory)
+        else:
+            return directory
+
+
+
+
+class EnCommands(CommonCommands):
+    def which_proccess(self):
+        print ("necryptio")
+    def folder_encryption(self ,directory , key ):
+        directory = directory
+        parent_dir =directory
+        key = key
+        value = check_content(directory)
+        if value == False:
+            # Encrypt folder
+            enc_traverse_directory(directory, key)
+
+        else:
+            paths_list = process_directory(directory)
+            file_count = 0
+            start_time = time.time()
+            for file_path in paths_list:
+                start_time = time.time()
+                encrypt_file(file_path, key)
+                file_count += 1
+               # print(f"{file_path} encrypted ")
+
+            end_time = time.time()
+            print(f"Total number of files encrypted is {file_count}")
+            elapsed_time = end_time - start_time
+            print("Time taken for encryption:", elapsed_time, "seconds")
+        return parent_dir
+
+    def file_encryption(self ,directory , key):
+        # Encrypt file
+        directory = directory
+        key = key
+        #print('path being passed  for encryption ', directory)
+        file_path = read_path(directory)
+        encrypt_file(file_path, key)
+        print("File encrypted successfully:", file_path)
+
+class DecCommands(CommonCommands):
+
+    def which_proccess(sef):
+        print ("dec")
+    def folder_decryption(self , directory ,  key):
+        path_list = process_directory(directory)
+        un_done = decrypt_multiple_files(key , path_list)
+        if len(un_done) > 0:
+            see = input("do yu wish to see the undecrypted files >(y , n)").lower()
+            if see == 'y':
+                for i , path in enumerate(un_done):
+                    print (i+1 , path)
+
+    def file_decryption(self , directory ,  key ):
+        decrypt_file(directory , key)
+        os.rename(directory, directory)
+        print(f"File decrypted successfully: {directory}")
+
+
+
+
+import os
+import time
+from cryptography.fernet import InvalidToken , Fernet
+from cyber.scripts.common_functions import directory_separator
+restricted_directories = [
+    "/etc",
+    "/bin",
+    "/sbin",
+    "/usr",
+    "/var",
+    "C:\\Windows",
+    "C:\\Program Files",
+    "C:\\Program Files (x86)",
+    "C:\\System Volume Information"
+]
+
+
+
+
+directory_separator = directory_separator()
+def decrypt_multiple_files(key , path_list):
+    un_done = []
+    file_count = len(path_list)
+    failed_file_count = 0
+    start_time = time.time()
+    for path in path_list:
+        decrypt_file(path , key , un_done , failed_file_count)
+    end_time = time.time()
+    correct_file_count = file_count - failed_file_count
+    print (("Time taken {}").format (end_time - start_time))
+    print(f"The original number of files was {file_count}")
+    print(f"The total number of files decrypted is {correct_file_count}")
+    return un_done
+
+
+def rename_file(full_path):
+    try:
+        ext = 'encrypted'
+        if os.name == 'posix':
+            directory_separator = '/'
+        else:
+            directory_separator = '\\'
+        if os.path.isfile(full_path):
+            # Split the file name by '.'
+            path_list = full_path.split('.')
+            # Check if 'ext' is in the path_list and remove it
+            path = os.path.dirname(full_path)
+            if ext in path_list:
+                path_list.remove(ext)
+            # Construct the new file name
+            if len(path_list[-1].split(directory_separator)) > 1:
+                extension = ''
+            else:
+                extension = path_list[-1]
+            new_name = path_list[0] + '.' + extension
+            # Rename the file
+            os.rename(full_path, os.path.join(path, new_name))
+            # print(f"Renamed: {full_path} to {new_name}")
+        else:
+            pass
+
+    except Exception as e:
+        print(f"Error renaming {full_path}: {e}")
+
+
+def decrypt_file(file_path, key , *args):
+    global  directory_separator
+    if len(args) > 0:
+        un_done = args[0]
+        failed_file_count = args[1]
+        un_done.append(file_path)
+        failed_file_count += 1
+       # print(un_done , failed_file_count)
+    try:
+        start_time = time.time()
+        with open(file_path, "rb") as file:
+            encrypted_data = file.read()
+        key = Fernet(key)
+        decrypted_data = key.decrypt(encrypted_data)
+        with open (file_path, 'wb') as file:
+            file.write(decrypted_data)
+        print ("File decrypted")
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(("Time taken for decryption: {:>102F} S").format(elapsed_time))
+        rename_file(file_path)
+
+    except InvalidToken:
+        half_file_path = (file_path.split(directory_separator)[-1])
+        if len(args)> 0:
+            un_done = args[0]
+            failed_file_count = args[1]
+            un_done.append(file_path)
+            failed_file_count+=1
+
+        print (f"Invaid key  for file {half_file_path}")
+        pass
+    except PermissionError:
+        pass
+
+
+
+
+
+
+
+
+
+
+    
+ 
+
+
+ 
+
+
+
+          
+        
+      
+        
+      
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+from cyber.scripts.common_functions import key_save_load , os , root , read_key
+from cyber.scripts.commands import DecCommands
+def code(directory , *args):
+    if len(args) > 0:
+        key = args[0]
+    else:
+        key = key_save_load()
+    path = directory
+
+    c = DecCommands()
+    while True:
+        c.display_folder(path)
+        choice = input(": ")
+        """"
+        provide the path key and starting folder
+        """
+        try:
+            choice = int(choice)
+            help_list = ['-h', '--h', '--help', '-H', 'h']
+            choice = int(choice)
+            if choice == 0:
+                path = c.navigate_back(path)
+            elif choice == -5:
+                c.clear_console()
+            elif choice == -2 or choice == -1:
+
+                while key == None:
+                    print ("key needed ")
+                    will = input ("DO you wish to load the key: (y,n)").lower()
+                    if will:
+                        key = key_save_load()
+                    elif will == 'b':
+                        break
+                if key != None:
+                    if choice == -2:
+                        c.file_decryption(path, key)
+                    elif choice == -1:
+                        c.folder_decryption(path, key)
+            elif int(choice) > 0:
+                path = c.go_foward(choice, path, key , "decrypt")
+                #c.display_folder(path)
+        except ValueError:
+            help_list = ['-h', '--h', '--help', '-H', 'h']
+            if choice == '-h' or choice in help_list:
+                c.ask_help()
+            elif choice ==  'b':
+                print ("switching from encryption")
+                break
+            else:
+                print("Listng ", path)
+                if os.path.isfile(path):
+                    path = os.path.dirname(path)
+                path = c.display_folder(path)
+
+        except NotADirectoryError:
+            pass
+
+        except FileNotFoundError:
+            pass
+
+        except IndexError:
+            print("index error ")
+
+        except PermissionError:
+            print(f"Permission denied for file {path}")
+            continue
+        except KeyboardInterrupt:
+            print("Good bye")
+            break
+
+
+#root_dir = os.getcwd()
+
+
+def dec_main(root_dir , *args):
+
+    code(root_dir)
+
+if __name__ == "__main__":
+    defualt_key = read_key("/home/brian/damaged'/Screenshot from 2023-07-25 04-29-07.txt")
+    root_dir = root()
+    code(root_dir , defualt_key)
+
+from cyber.scripts.decrypter.dec_run import dec_main
+from cyber.scripts.encrypter.enc_run import enc_main
+from cyber.scripts.common_functions import (
+    root,
+    enc_help,
+    clear_console
+)
+
+HELP_OPTIONS = ['-h', '--h', '--help', '-H', 'h', 'H']
+def main():
+    while True:
+        try:
+            choice = input("Decrypt = 1\nEncrypt = 2\n:")
+            if choice not in HELP_OPTIONS and choice != '-5' and choice != 'b':
+                starting_directory = root()
+                if choice == '1':
+                    process = "Decryption"
+                    dec_main(starting_directory)
+                elif choice == '2':
+                    process = "Encryption"
+                    enc_main(starting_directory)
+            elif choice == 'b':
+                break
+            elif choice == '-5':
+                print("Clearing screen")
+                clear_console()
+            elif choice in HELP_OPTIONS:
+                print("#" * 20)
+                print(enc_help())
+        except KeyboardInterrupt:
+            break
+        except UnboundLocalError:
+            pass
+
+if __name__ == "__main__":
+    main()
+
+check_content
+clear_console
+key_save_load???
+process_directory
+traverse_directory
+return_prev
+read_path
+read_file
+read_path
+com
+
+features
+from cyber.scripts.common_functions import key_save_load , root , read_key
+
+from cyber.scripts.commands import EnCommands
+
+
+paths_list =[]
+restricted_directories = [
+    "/etc",
+    "/bin",
+    "/sbin",
+    "/usr",
+    "/var",
+    "C:\\Windows",
+    "C:\\Program Files",
+    "C:\\Program Files (x86)",
+    "C:\\System Volume Information"
+]
+def code(directory , *args):
+    if len(args) > 0:
+        key = args[0]
+    else:
+        key = key_save_load()
+
+    c = EnCommands()
+    path = directory
+
+    help_list = ['-h' , '--h' , '--help' , '-H' , 'h' , 'H']
+    while True:
+        choice = input(": ")
+        """"
+        provide the path key and starting folder
+        """
+        try:
+
+            choice = int(choice)
+            if choice == 0:
+                path = c.navigate_back(path)
+                c.display_folder(path)
+            elif choice == -5:
+                c.clear_console()
+            elif choice == -2 or choice == -1:
+                while key == None:
+                    print ("key needed ")
+                    will = input ("DO you wish to load the key: (y,n)").lower()
+                    if will:
+                        key = key_save_load()
+                    elif will == 'b':
+                        break
+                if key != None:
+                    if choice == -2:
+                        c.file_encryption(path, key)
+                    elif choice == -1:
+                        c.folder_encryption(path, key)
+
+            elif int(choice) > 0:
+                path = c.go_foward(choice, path, key , "encrypt")
+                c.display_folder(path)
+        except ValueError:
+            if choice == '-h' or choice in help_list:
+                c.ask_help()
+            elif choice ==  'b':
+                print ("switching from encryption")
+                break
+            else:
+                print("Listing ")
+                path = c.display_folder(path)
+        except NotADirectoryError:
+            pass
+
+        except FileNotFoundError:
+            pass
+
+        except IndexError:
+            print("index error ")
+
+        except PermissionError:
+            print(f"Permission denied for file {path}")
+            continue
+        except KeyboardInterrupt:
+            print("Good bye")
+            break
+
+
+def enc_main(root_dir ,*args):
+    code(root_dir)
+
+
+if __name__ == "__main__":
+    defualt_key = read_key("/home/brian/damaged'/Screenshot from 2023-07-25 04-29-07.txt")
+    root_dir = root()
+    code(root_dir , defualt_key)
+import os
+import time
+from cryptography.fernet  import Fernet
+
+
+def encrypt_file(file_path, key):
+    file_count = 0
+    try:
+        start = time.time()
+        with open(file_path, "rb") as file:
+            # Read the contents of the file
+            file_data = file.read()
+        # Encrypt the file data
+        fernet = Fernet(key)
+        encrypted_data = fernet.encrypt(file_data)
+        # Write the encrypted data back to the file
+        with open(file_path, "wb") as file:
+            file.write(encrypted_data)
+        file_count = file_count + 1 
+        if os.name == 'posix':
+            directory_separator = '/'
+        else:
+            directory_separator = '\\'
+        new_path = os.rename(file_path, file_path + ".encrypted")
+        end_time = time.time()
+        print (("encrypted {} Time taken {} ").format(file_path,end_time- start))
+        return  file_count
+    except PermissionError:
+        print(f"Skipping file {file_path}: permission denied")
+        pass
+     
+
+def enc_traverse_directory(directory, key):
+    file_count = 0
+    # Traverse through directory and encrypt files
+    start_time = time.time()
+    for root, dirs, files in os.walk(directory):
+        if files:
+            for file in files:
+                file_path = os.path.join(root, file)
+                encrypt_file(file_path, key)
+                file_count = file_count + 1
+                if os.name == 'posix':
+                    directory_separator = '/'
+                else:
+                    directory_separator = '\\'
+
+                if os.path.exists(file_path):
+                    os.rename(file_path, file_path + ".encrypted")
+
+                print("File encrypted successfully:", file_path)
+    print(f"The total number of files encrypted is {file_count}")
+    end_time = time.time()
+    elapsed = end_time - start_time
+    print(f'Total time taken  {elapsed} seconds')
+
+
+# Created by pytest automatically.
+*
+[
+  "commands.py::testing_commannds"
+]{
+  "commands.py": true,
+  "commands.py::testing_commannds": true
+}[]Signature: 8a477f597d28d172789f06886806bc55
+# This file is a cache directory tag created by pytest.
+# For information about cache directory tags, see:
+#	https://bford.info/cachedir/spec.html
+# pytest cache directory #
+
+This directory contains data from the pytest's cache plugin,
+which provides the `--lf` and `--ff` options, as well as the `cache` fixture.
+
+**Do not** commit this to version control.
+
+See [the docs](https://docs.pytest.org/en/stable/how-to/cache.html) for more information.
+from cryptography.fernet import Fernet
+import os
+import tkinter as tk
+from tkinter import filedialog
+def directory_separator():
+    if os.name == 'posix':
+        directory_separator = '/'
+    else:
+        directory_separator = '\\'
+
+    return directory_separator
+
+
+
+def root():
+    directory_sep = directory_separator()
+    root_dir_choice = input(
+        f"Enter (r) to start from root directory\nPress enter start from ({os.getcwd()})")
+    if root_dir_choice.lower() == "r":
+        if os.name == 'posix':
+            directory = '/'
+        else:
+            directory = 'C:\\'
+
+    else:
+        directory = os.getcwd()
+
+    return  directory
+def enc_help():
+
+    help_messsage = """
+    📜 File Encryption Utility Help 📜
+
+    Encrypt/Decrypt your files and folders with ease! Use this script to secure your data.
+    See below for usage instructions and examples.
+
+    Usage:
+    - `python encryption_script.py [root_directory]`
+
+    Options:
+    
+    - `-b, --break`                    to swich role
+    - `-h, --help`                     Show this help message and exit
+    - `-1, --encrypt/decrypt-folder`   current folder
+    - `-2, --encrypt/decrypt-file`     a file
+    - `-5,  clear console`             clear console
+
+    Examples:
+    - `python encryption_script.py /home/user/Documents`
+    - `python encryption_script.py /home/user/Documents -1`
+    - `python encryption_script.py /home/user/Documents -2 file.txt`
+    """
+
+    return help_messsage
+
+
+
+def check_content(path):
+    """"
+    Returns true if folder has both files and folders
+    """
+    mixed_content = False
+
+    with os.scandir(path) as entries:
+        for entry in entries:
+            if entry.is_file():
+                # print (f"{entry} is file")
+                mixed_content = True
+            elif entry.is_dir():
+
+                mixed_content = False
+
+    if mixed_content:
+
+        return True
+    else:
+
+        return False
+
+def clear_console():
+    # Clear console output based on operating system
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+paths_list = []
+un_done = []
+
+def process_directory(path):
+    global paths_list
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
+        if os.path.isfile(item_path):
+            paths_list.append(item_path)
+            # print(f"Found file: {item_path}")
+            # Do something with the file...
+        elif os.path.isdir(item_path):
+            # print(f"Found directory: {item_path}")
+            process_directory(item_path)  # Recursively process subdirectories
+        else:
+            print(f"Found unknown item: {item_path}")
+    return (paths_list)
+
+
+
+
+def read_path(directory):
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        root.configure(bg='purple')
+        root.geometry('800x600')
+
+        file_path = filedialog.askopenfilename(filetypes=[("All Files", "*.*")], initialdir=directory, title="Select file")
+
+        return file_path
+    except KeyboardInterrupt:
+        print("good bye")
+
+
+
+def read_key(*args):
+    if len(args) > 0:
+        key_path = args[0]
+    else:
+      key_path = read_path(os.getcwd())
+    if key_path:
+        print("Selected file:", key_path)
+
+        with open(key_path, 'rb') as file:
+            contents = file.read()
+
+    return contents
+
+
+def read_single_file():
+    try:
+        global root_dir
+        root = tk.Tk()
+        root.withdraw()
+        root.configure(bg='purple')
+        root.geometry('800x600')
+
+        file_path = filedialog.askopenfilename(
+            filetypes=[("All Files", "*.*")],
+            initialdir=root_dir,
+            title="Select file"
+        )
+
+        root.destroy()  # Close the Tkinter window and exit the program
+        return file_path
+    except KeyboardInterrupt:
+        print("good bye")
+
+
+def write_key_to_file(key):
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        root.configure(bg='purple')
+        root.geometry('800x600')
+
+        # Adjust initialdir based on the operating system
+        if os.name == 'posix':
+            initialdir = '/'
+        else:
+            initialdir = 'C:\\'
+
+        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("All Files", "*.*")],
+                                                 initialdir=initialdir, title="Select file")
+        if file_path:
+            print("Selected file:", file_path)
+            with open(file_path, 'wb') as file:
+                file.write(key)
+                print("""
+                      +------------------+
+                      |  Key written     |
+                      |  successfully!   |
+                      +------------------+
+                """)
+            # Do something with the selected file here
+
+        root.destroy()  # Close the Tkinter window and exit the program
+
+    except KeyboardInterrupt:
+        print("key not saved")
+
+
+def key_save_load():
+    save_key = str(input("Generate new key (y)\nLoad key now (r)\nPress enter to skip:")).lower()
+    if save_key == 'y':
+        key = Fernet.generate_key()
+        write_key_to_file(key)
+    elif save_key == 'r':
+        key = read_key()
+    else:
+        key = None
+
+    return key
+
+
