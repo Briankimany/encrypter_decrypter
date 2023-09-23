@@ -1,0 +1,37 @@
+# Ignore Compiled Python bytecode files
+*.pyc
+
+# Ignore the directory where Python stores compiled bytecode
+__pycache__/
+
+# Ignore Optimized Python bytecode files
+*.pyo
+
+# Ignore Python dynamic link libraries (Windows)
+*.pyd
+
+# Ignore Virtual environment directories
+.venv/
+
+# Ignore directory containing package metadata for Python eggs
+*.egg-info/
+
+# Ignore directory containing built distribution files
+dist/
+
+# Ignore directory containing temporary build files
+build/
+
+# Ignore .tox directory
+.tox/
+ *.idea 
+
+*.git
+
+
+testing_dir/
+
+.idea/
+.pytest_cache/
+
+.ipynb_checkpoints
