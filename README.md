@@ -70,14 +70,14 @@ In this project, you can download executable files and binaries for different op
 ### Linux
 
 You can download the Linux executable file from the following link:
-- [Linux Executable](https://example.com/linux-executable)
+- [Linux Executable](https://github.com/Briankimany/enrypter_decrypter/blob/executables/linux.zip)
 
 After downloading, place the executable file in your project directory and ensure it's named "my_executable_linux."
 
 ### Windows
 
 You can download the Windows executable file from the following link:
-- [Windows Executable](https://example.com/windows-executable.exe)
+- [Windows Executable](https://github.com/Briankimany/enrypter_decrypter/blob/executables/windows.zip)
 
 After downloading, place the executable file in your project directory and ensure it's named "my_executable_windows."
 
