@@ -79,12 +79,6 @@ After downloading, place the executable file in your project directory and ensur
 You can download the Windows executable file from the following link:
 - [Windows Executable](https://github.com/Briankimany/enrypter_decrypter/blob/executables/windows.zip)
 
-After downloading, place the executable file in your project directory and ensure it's named "my_executable_windows."
-
-**Note**: These executable files are meant to complement the Python scripts in this project and enhance compatibility with various operating systems.
-
-
-
 
 
 ## Usage
