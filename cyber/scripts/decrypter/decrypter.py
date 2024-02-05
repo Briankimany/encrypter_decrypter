@@ -56,12 +56,15 @@ def rename_file(full_path):
             new_name = path_list[0] + '.' + extension
             # Rename the file
             os.rename(full_path, os.path.join(path, new_name))
-            # print(f"Renamed: {full_path} to {new_name}")
+            print(f"Renamed: {full_path} to {new_name}")
+            
+            return full_path
         else:
             pass
 
     except Exception as e:
         print(f"Error renaming {full_path}: {e}")
+        return None
 
 
 def decrypt_file(file_path, key , *args):
@@ -78,13 +81,15 @@ def decrypt_file(file_path, key , *args):
             encrypted_data = file.read()
         key = Fernet(key)
         decrypted_data = key.decrypt(encrypted_data)
+        print(file_path)
         with open (file_path, 'wb') as file:
             file.write(decrypted_data)
     
         end_time = time.time()
         elapsed_time = end_time - start_time
         print(("File decrypted:Time taken : {:>.2F} S").format(elapsed_time))
-        rename_file(file_path)
+        res = rename_file(file_path)
+        print("Here is res from decrypt" , res)
 
     except InvalidToken:
         half_file_path = (file_path.split(directory_separator)[-1])
