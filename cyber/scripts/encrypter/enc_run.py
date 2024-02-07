@@ -1,7 +1,7 @@
 
 from cyber.scripts.common_functions import key_save_load, get_root_dir , read_key
-
 from cyber.scripts.commands import EnCommands
+import os
 
 
 paths_list =[]
@@ -16,10 +16,15 @@ restricted_directories = [
     "C:\\Program Files (x86)",
     "C:\\System Volume Information"
 ]
-def code(directory , *args):
+def code(directory , key_path = None):
 
     c = EnCommands()
-    key = key_save_load(directory)
+   
+    
+    if key_path!= None and os.path.exists(key_path):
+        key = read_key(key_path)
+    else:
+        key = key_save_load(directory)
     path = directory
 
     help_list = ['-h' , '--h' , '--help' , '-H' , 'h' , 'H']
@@ -64,6 +69,7 @@ def code(directory , *args):
                 c.ask_help()
             elif choice ==  'b':
                 print ("switching from encryption")
+                
                 break
             else:
                 print("Listing ")
@@ -83,10 +89,13 @@ def code(directory , *args):
         except KeyboardInterrupt:
             print("Good bye")
             break
+        
+    directory  = path
+    return directory
 
-
-def enc_main(root_dir ,*args):
-    code(root_dir)
+    
+def enc_main(root_dir ,key_path):
+   return code(root_dir , key_path=key_path)
 
 
 if __name__ == "__main__":

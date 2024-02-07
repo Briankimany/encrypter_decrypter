@@ -23,8 +23,14 @@ def decrypt_multiple_files(key , path_list):
     file_count = len(path_list)
     failed_file_count = 0
     start_time = time.time()
-    for path in path_list:
+   
+    data =key , un_done , failed_file_count
+    def work(path , data = data):
+        key , un_done , failed_file_count = data
         decrypt_file(path , key , un_done , failed_file_count)
+    
+    results_ = list(map(work , path_list))
+
     end_time = time.time()
     correct_file_count = file_count - failed_file_count
     print (("Time taken {:.2F}").format (end_time - start_time))
@@ -36,29 +42,32 @@ def decrypt_multiple_files(key , path_list):
 
 def rename_file(full_path):
     try:
-        ext = 'encrypted'
+        ext = '.encrypted'
         if os.name == 'posix':
             directory_separator = '/'
         else:
             directory_separator = '\\'
         if os.path.isfile(full_path):
             # Split the file name by '.'
-            path_list = full_path.split('.')
+            
+            path_list = [os.path.dirname(full_path)] + list( os.path.splitext(os.path.basename(full_path)))
+
+            source_dir  =  os.path.dirname(full_path)
+            base_name  = os.path.basename(full_path)
+            file_name ,file_extension  = os.path.splitext(base_name)
             # Check if 'ext' is in the path_list and remove it
             path = os.path.dirname(full_path)
-            if ext in path_list:
-                path_list.remove(ext)
-            # Construct the new file name
-            if len(path_list[-1].split(directory_separator)) > 1:
-                extension = ''
+            if file_extension == ext:
+               
+               new_name = file_name
+                
             else:
-                extension = path_list[-1]
-            new_name = path_list[0] + '.' + extension
+                new_name = base_name
+            new_file_name =  os.path.join(path, new_name)
             # Rename the file
-            os.rename(full_path, os.path.join(path, new_name))
-            print(f"Renamed: {full_path} to {new_name}")
+            os.rename(full_path,new_file_name)
             
-            return full_path
+            return new_file_name
         else:
             pass
 
@@ -87,9 +96,9 @@ def decrypt_file(file_path, key , *args):
     
         end_time = time.time()
         elapsed_time = end_time - start_time
-        print(("File decrypted:Time taken : {:>.2F} S").format(elapsed_time))
+        # print(("File decrypted:Time taken : {:>.2F} S").format(elapsed_time))
         res = rename_file(file_path)
-        print("Here is res from decrypt" , res)
+     
 
     except InvalidToken:
         half_file_path = (file_path.split(directory_separator)[-1])

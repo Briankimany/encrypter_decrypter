@@ -1,7 +1,26 @@
 from cryptography.fernet import Fernet
-import os
+import os , json
 import tkinter as tk
 from tkinter import filedialog
+
+
+def save_load_program_data(path ,data= None ,mode = 'r'):
+    
+    try:
+        with open(path , mode) as file:
+            
+            if mode == "r":
+                return json.load(file)
+            elif data != None and mode == 'w':
+                json.dump(data , file)
+                return None
+            else:
+                return None
+    except Exception as e:
+        print(f"Problem loading or saving data {str(e)}")
+      
+
+
 def directory_separator():
     if os.name == 'posix':
         directory_separator = '/'
@@ -130,9 +149,6 @@ def read_key(*args):
               
         elif len (args) == 0:
             key_path = read_path(os.getcwd())
-
-
-        print("Reading key from >>", key_path)
 
         with open(key_path, 'rb') as file:
             contents = file.read()
