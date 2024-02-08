@@ -4,12 +4,28 @@ import tkinter as tk
 from tkinter import filedialog
 
 
+def obfuscate_credentials(credentials):
+    obfuscated_credentials = {}
+    for key, value in credentials.items():
+        obfuscated_value = ''.join([chr(ord(char) + 1) for char in value])
+        obfuscated_credentials[key] = obfuscated_value
+    return obfuscated_credentials
+
+def deobfuscate_credentials(obfuscated_credentials):
+    credentials = {}
+    for key, value in obfuscated_credentials.items():
+        deobfuscated_value = ''.join([chr(ord(char) - 1) for char in value])
+        credentials[key] = deobfuscated_value
+    return credentials
+
+
 def save_load_program_data(path ,data= None ,mode = 'r'):
     
     try:
         with open(path , mode) as file:
             
             if mode == "r":
+                
                 return json.load(file)
             elif data != None and mode == 'w':
                 json.dump(data , file)
