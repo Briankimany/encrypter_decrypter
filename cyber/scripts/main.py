@@ -1,7 +1,7 @@
 
 from cyber.scripts.decrypter.dec_run import dec_main
 from cyber.scripts.encrypter.enc_run import enc_main
-from cyber.scripts.common_functions import save_load_program_data  ,get_root_dir,enc_help,clear_console , obfuscate_credentials , deobfuscate_credentials
+from common_functions import save_load_program_data  ,get_root_dir,enc_help,clear_console , obfuscate_credentials , deobfuscate_credentials
 import os
 
 class RunProgram():
@@ -15,8 +15,8 @@ class RunProgram():
             os.chdir("cyber/scripts")
         
         self.program_configuration_path= "conf.pkl"
-        
-        self.program_configuration = save_load_program_data(self.program_configuration_path , mode='r')
+        self.key_path = "key.txt"
+        self.program_configuration = save_load_program_data(self.program_configuration_path , mode='rb')
         
         if self.program_configuration != None:
             self.program_configuration  = deobfuscate_credentials(self.program_configuration)
@@ -34,7 +34,7 @@ class RunProgram():
                     }
             for key  in self.program_configuration.keys():
                 if key == 'password':
-                    print("Make sure to remmeber you password cause there is no resetting it ")
+                    print("Make sure to remember you password cause there is no resetting it ")
                 
                 default_values = self.program_configuration[key]
                 value = input(f"Set {key}:Press enter to leave as default {default_values}: ")
@@ -42,9 +42,10 @@ class RunProgram():
                     self.program_configuration[key] = value
                     
             data = obfuscate_credentials(self.program_configuration)
-            save_load_program_data(self.program_configuration_path , data=data,mode='w')
+            save_load_program_data(self.program_configuration_path , data=data ,mode='wb')
             
-        self.key_path = "key.txt"
+        
+
 
     def verify(self , count = 1):
         
@@ -60,9 +61,10 @@ class RunProgram():
     
 
     def main(self):
+       
         while True:
             try:
-                clear_console()
+                # clear_console()
                 choice = input("Decrypt = 1\nEncrypt = 2\n>:")
                 if choice not in self.HELP_OPTIONS and choice != '-5' and choice != 'b':
                     
@@ -80,7 +82,8 @@ class RunProgram():
                         
                 elif choice == 'b':
                     save_load_program_data(self.program_configuration_path , data=obfuscate_credentials(self.program_configuration)
-                                                  ,mode='w')
+                                                  ,mode='wb')
+                    
                     break
                 elif choice == '-5':
                     print("Clearing screen" , self.program_configuration)
@@ -98,6 +101,7 @@ class RunProgram():
     
     def run(self):
         print("veryfying")
+      
         count = 1
         while count < 4:
             verified = self.verify(count=count)

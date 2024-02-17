@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import filedialog
 import pickle
 
+
 def obfuscate_credentials(credentials):
     obfuscated_credentials = {}
     for key, value in credentials.items():
@@ -25,15 +26,16 @@ def save_load_program_data(path ,data= None ,mode = 'rb'):
         with open(path , mode) as file:
             
             if mode == "rb":
-                
-                pickle.load(file)
+                return pickle.load(file)
             elif data != None and mode == 'wb':
+           
                 pickle.dump(data , file)
                 return None
             else:
                 return None
     except Exception as e:
         print(f"Problem loading or saving data {str(e)}")
+        return None
       
 
 
@@ -135,9 +137,6 @@ def process_directory(path):
             print(f"Found unknown item: {item_path}")
     return (paths_list)
 
-
-
-
 def read_path(directory):
     try:
         root = tk.Tk()
@@ -153,9 +152,6 @@ def read_path(directory):
 
     except KeyboardInterrupt:
         print("good bye")
-
-
-
 
 def read_key(*args):
         print (len(args))
@@ -253,8 +249,5 @@ def key_save_load(path):
 
 
 if __name__ == "__main__":
-    start = get_root_dir()
-    print (f"This is the starting\n{start}")
+    pass
 
-    key = key_save_load(start)
-    print(key)
