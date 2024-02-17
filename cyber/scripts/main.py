@@ -14,7 +14,7 @@ class RunProgram():
         if os.path.exists("cyber/scripts"):
             os.chdir("cyber/scripts")
         
-        self.program_configuration_path= "conf.json"
+        self.program_configuration_path= "conf.pkl"
         
         self.program_configuration = save_load_program_data(self.program_configuration_path , mode='r')
         
@@ -116,9 +116,6 @@ class RunProgram():
         if verified == True:
             self.main()
      
-        
-
-
 
 
 if __name__ == "__main__":

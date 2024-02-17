@@ -1,8 +1,8 @@
 from cryptography.fernet import Fernet
-import os , json
+import os 
 import tkinter as tk
 from tkinter import filedialog
-
+import pickle
 
 def obfuscate_credentials(credentials):
     obfuscated_credentials = {}
@@ -19,16 +19,16 @@ def deobfuscate_credentials(obfuscated_credentials):
     return credentials
 
 
-def save_load_program_data(path ,data= None ,mode = 'r'):
+def save_load_program_data(path ,data= None ,mode = 'rb'):
     
     try:
         with open(path , mode) as file:
             
-            if mode == "r":
+            if mode == "rb":
                 
-                return json.load(file)
-            elif data != None and mode == 'w':
-                json.dump(data , file)
+                pickle.load(file)
+            elif data != None and mode == 'wb':
+                pickle.dump(data , file)
                 return None
             else:
                 return None
